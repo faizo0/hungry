@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Star, Clock, MapPin, ShoppingBag, Plus, Minus, Send, Navigation } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, ShoppingBag, Plus, Minus, Send, Navigation, ChevronUp, X } from 'lucide-react';
 
 export default function RestaurantDetail({ restaurant, onBack }) {
   const [cart, setCart] = useState({});
@@ -7,6 +7,7 @@ export default function RestaurantDetail({ restaurant, onBack }) {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Add item with selected size
   const handleAddToCart = (item, sizeName, price) => {
@@ -44,6 +45,7 @@ export default function RestaurantDetail({ restaurant, onBack }) {
   };
 
   const cartItems = Object.values(cart);
+  const totalItemsCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
   const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
   // Auto Get Live GPS Location Function
@@ -106,9 +108,9 @@ export default function RestaurantDetail({ restaurant, onBack }) {
   const lastName = nameParts.slice(1).join(' ');
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn pb-24">
       {/* Header */}
-      <div className="relative bg-gradient-to-br- from-neutral-900 via-black to-neutral-950 border border-red-600/40 rounded-3xl p-6 md:p-8 overflow-hidden shadow-2xl">
+      <div className="relative bg-gradient-to-br from-neutral-900 via-black to-neutral-950 border border-red-600/40 rounded-3xl p-6 md:p-8 overflow-hidden shadow-2xl">
         <div className="absolute -top-12 -right-12 w-72 h-72 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-12 -left-12 w-72 h-72 bg-yellow-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -229,16 +231,15 @@ export default function RestaurantDetail({ restaurant, onBack }) {
           </div>
         </div>
 
-        {/* Cart & Checkout Form Sidebar with Red & Yellow Mix Gradient Background */}
-        <div className="lg:col-span-4">
-          <div className="relative- bg-gradient-to-br- from-neutral-900 via-black to-neutral-950 border border-red-600/40 rounded-3xl p-6 sticky top-6 shadow-2xl overflow-hidden">
-            {/* کارٹ باکس کے اندر ہلکا سا ریڈ اور یلو گلو */}
+        {/* Desktop Cart & Checkout Form Sidebar */}
+        <div className="lg:col-span-4 hidden lg:block">
+          <div className="bg-gradient-to-br from-neutral-900 via-black to-neutral-950 border border-red-600/40 rounded-3xl p-6 sticky top-6 shadow-2xl overflow-hidden">
             <div className="absolute -top-10 -right-10 w-48 h-48 bg-red-600/15 rounded-full blur-2xl pointer-events-none"></div>
             <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-yellow-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
             <div className="relative z-10">
               <h3 className="text-lg font-black text-white mb-4 pb-3 border-b border-neutral-800 flex items-center">
-                <ShoppingBag className="w-4 h-4 text-yellow-400 mr-2" /> Your Cart ({cartItems.reduce((a, c) => a + c.qty, 0)})
+                <ShoppingBag className="w-4 h-4 text-yellow-400 mr-2" /> Your Cart ({totalItemsCount})
               </h3>
 
               {cartItems.length === 0 ? (
@@ -318,7 +319,7 @@ export default function RestaurantDetail({ restaurant, onBack }) {
 
                     <button 
                       type="submit"
-                      className="w-full bg-gradient-to-r- from-red-600 to-yellow-500 hover:from-red-500 hover:to-yellow-400 text-black font-black text-xs py-3 rounded-xl transition-all shadow-lg shadow-red-950/50 flex items-center justify-center space-x-2 mt-2"
+                      className="w-full bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 hover:from-red-500 hover:to-yellow-400 text-black font-black text-xs py-3.5 rounded-xl transition-all shadow-xl shadow-red-950/60 flex items-center justify-center space-x-2 mt-2 border border-yellow-400/40"
                     >
                       <Send className="w-4 h-4 text-black" />
                       <span>Send Order via WhatsApp</span>
@@ -330,6 +331,132 @@ export default function RestaurantDetail({ restaurant, onBack }) {
           </div>
         </div>
       </div>
+
+      {/* Foodpanda Style Sticky Bottom Cart Bar (Mobile & Responsive) */}
+      {totalItemsCount > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-neutral-950/95 backdrop-blur-md border-t border-red-600/50 p-4 shadow-2xl animate-slideUp">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-r from-red-600 to-yellow-500 text-black font-black px-3 py-1.5 rounded-xl text-xs shadow-md">
+                {totalItemsCount} Items
+              </div>
+              <div>
+                <p className="text-white font-extrabold text-sm">Rs. {totalAmount + 150}</p>
+                <p className="text-[10px] text-neutral-400">Incl. delivery charges</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 hover:from-red-500 hover:to-yellow-400 text-black font-black px-5 py-2.5 rounded-xl text-xs shadow-lg shadow-red-950/50 flex items-center space-x-1.5 border border-yellow-400/40 transition-transform active:scale-95"
+            >
+              <span>View Cart & Checkout</span>
+              <ChevronUp className="w-4 h-4 text-black" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Foodpanda Style Cart Modal / Drawer */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end justify-center animate-fadeIn">
+          <div className="bg-gradient-to-br from-neutral-900 via-black to-neutral-950 border-t border-red-600/50 w-full max-w-lg rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-neutral-800">
+              <h3 className="text-lg font-black text-white flex items-center">
+                <ShoppingBag className="w-5 h-5 text-yellow-400 mr-2" /> Your Cart ({totalItemsCount})
+              </h3>
+              <button 
+                onClick={() => setIsCartOpen(false)}
+                className="bg-neutral-800 hover:bg-neutral-700 text-white p-2 rounded-xl"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2.5 max-h-40 overflow-y-auto pr-1">
+                {cartItems.map((item) => {
+                  const cartKey = `${item.id}-${item.size}`;
+                  return (
+                    <div key={cartKey} className="flex justify-between items-center text-xs bg-black/70 p-3 rounded-xl border border-neutral-800 shadow-inner">
+                      <div>
+                        <p className="text-white font-bold">{item.name} {item.size !== 'Standard' && <span className="text-yellow-400">({item.size})</span>}</p>
+                        <p className="text-yellow-400 font-semibold">Rs. {item.price} x {item.qty}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button onClick={() => handleRemoveFromCart(cartKey)} className="bg-neutral-800 text-neutral-300 p-1.5 rounded-lg"><Minus className="w-3.5 h-3.5" /></button>
+                        <span className="text-white font-bold px-1 text-sm">{item.qty}</span>
+                        <button onClick={() => handleAddToCart(item, item.size, item.price)} className="bg-neutral-800 text-yellow-400 p-1.5 rounded-lg"><Plus className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-3 border-t border-neutral-800 space-y-1.5 text-xs text-neutral-200">
+                <div className="flex justify-between"><span>Subtotal:</span> <span className="font-bold text-white">Rs. {totalAmount}</span></div>
+                <div className="flex justify-between"><span>Delivery Charges:</span> <span className="font-bold text-white">Rs. 150</span></div>
+                <div className="flex justify-between text-sm font-black pt-2 border-t border-neutral-800 text-yellow-400">
+                  <span>Total Bill:</span> <span>Rs. {totalAmount + 150}</span>
+                </div>
+              </div>
+
+              <form onSubmit={(e) => { handleWhatsAppCheckout(e); setIsCartOpen(false); }} className="space-y-3 pt-3 border-t border-neutral-800">
+                <div>
+                  <label className="block text-[11px] font-bold text-neutral-300 mb-1">Your Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Muhammad Faizan"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full bg-black/80 border border-neutral-800 rounded-xl px-3 py-2.5 text-xs text-white focus:border-red-600 outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-neutral-300 mb-1">Phone Number (Contact)</label>
+                  <input 
+                    type="tel" 
+                    placeholder="e.g. 03001234567"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="w-full bg-black/80 border border-neutral-800 rounded-xl px-3 py-2.5 text-xs text-white focus:border-red-600 outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[11px] font-bold text-neutral-300">Delivery Address / Location</label>
+                    <button
+                      type="button"
+                      onClick={handleGetLiveLocation}
+                      className="text-[10px] bg-red-600/25 hover:bg-red-600/40 text-yellow-400 font-bold px-2.5 py-1 rounded-lg flex items-center space-x-1 border border-red-500/40 transition-colors"
+                    >
+                      <Navigation className="w-3 h-3 mr-1 text-red-500" />
+                      <span>{locationLoading ? 'Locating...' : 'Get Live GPS'}</span>
+                    </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="Type address or click 'Get Live GPS'"
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    className="w-full bg-black/80 border border-neutral-800 rounded-xl px-3 py-2.5 text-xs text-white focus:border-red-600 outline-none transition"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 hover:from-red-500 hover:to-yellow-400 text-black font-black text-xs py-3.5 rounded-xl transition-all shadow-xl shadow-red-950/60 flex items-center justify-center space-x-2 mt-2 border border-yellow-400/40"
+                >
+                  <Send className="w-4 h-4 text-black" />
+                  <span>Send Order via WhatsApp</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
